@@ -1,0 +1,63 @@
+* {
+font-family: "Fira Code", "JetBrains Mono", sans-serif;
+font-size: 12px;
+color: #ffffff; /* Pure white text */
+}
+
+window#waybar {
+    background-color: rgba(0, 0, 0, 0.0); /* Fully transparent base */
+}
+
+/* All modules - Pitch black with rounded corners */
+.modules-left,
+.modules-center,
+.modules-right,
+#workspaces,
+#clock,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#battery,
+#tray {
+background-color: #000000; /* Absolute black */
+padding: 0 12px;
+margin: 4px 2px;
+font-weight: bold;
+}
+
+/* Workspaces */
+#workspaces button {
+background: transparent;
+color: #888888; /* Dim inactive workspaces */
+border-radius: 8px;
+padding: 0 8px;
+}
+
+#workspaces button.active {
+color: #ffffff;
+background-color: #333333; /* Dark gray highlight */
+}
+
+/* Hover effect */
+#workspaces button:hover {
+background-color: #222222;
+}
+
+/* Critical battery warning */
+#battery.critical {
+color: #ff5555;
+animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+    to { opacity: 0.3; }
+}
+
+/* Module-specific tweaks */
+#clock {
+}
+
+#tray {
+padding-right: 10px;
+}
