@@ -4,20 +4,30 @@
 
 { config, pkgs, lib, ... }:
 
-{    
+let
+    home-manager = builtins.fetchTarball https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz;
+in
+{     
     imports = 
-    [# Include the results of the hardware scan
+    [# Include the results of the hardware scan 
     ./hardware-configuration.nix 
+     (import "${home-manager}/nixos")
     ];
+   
+      users.users.natem.isNormalUser = true;
+  home-manager.users.natem = { pkgs, ... }: {
+    home.packages = [ pkgs.atool pkgs.httpie ];
+    programs.bash.enable = true;
+  
+    # The state version is required and should stay at the version you
+    # originally installed.
+    home.stateVersion = "25.05";
+  };
 
     # Enable OpenGL
     hardware.graphics = {
     enable = true; 
     };
-    
-    # services.xserver.displayManager.sessionCommands = ''
-   
-    # ''; 
 
     # Load nvidia driver for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
@@ -43,14 +53,14 @@
     # supported GPUs is at: 
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
     # Only available from driver 515.43.04+ 
-    open = false; 
+    open = true; 
 
     # Enable the Nvidia settings menu,
     # acessible via 'nvidia-settings'.
     nvidiaSettings = true; 
     
     #Optionally, you may need to select the appropriate driver version for your specific GPU. 
-    package = config.boot.kernelPackages.nvidiaPackages.latest; 
+    package = config.boot.kernelPackages.nvidiaPackages.beta; 
 }; 
     
     hardware.nvidia.prime = {
@@ -129,17 +139,7 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.natem = {
-    isNormalUser = true;
-    description = "Nate Mina";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    #  thunderbird
-    ];
-  };
- 
-  # I 
-  
+
   # Install hyprland and other programs 
   programs.hyprland.enable = true;
   programs.waybar.enable = true; 
@@ -194,9 +194,26 @@
    nh 
    gedit
    lshw
+   dunst
+   libnotify
+   fd
    (import <nixos-unstable> {}).protonmail-desktop
-
-];
+ 
+   (buildFHSUserEnv {
+     name = "nvidia-install-env";
+     targetPkgs = pkgs: with pkgs; [
+       libgcc
+       gccgo14
+       gnumake
+       glibc
+       libcxx
+       gcc
+       # Add other necessary packages here
+      ];
+      runScript = "sh ./NVIDIA-Linux-x86_64-575.51.02.run -m=kernel-open";
+    })
+  ];
+   
   system.stateVersion = "24.11"; 
   }
   # Some programs need SUID wrappers, can be configured further or are
