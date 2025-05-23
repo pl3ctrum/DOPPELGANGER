@@ -59,8 +59,9 @@
 }; 
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub.enable = true;
+  boot.loader.grub.device = "/dev/sdb";
+  boot.loader.grub.useOSProber = true;
 
   networking.hostName = "DOPPELGANGER"; # Define your hostname.
   networking.wireless.enable = false;  # Enables wireless support via wpa_supplicant.
