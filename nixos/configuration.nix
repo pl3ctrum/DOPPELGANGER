@@ -4,26 +4,17 @@
 
 { config, pkgs, lib, ... }:
 
-let
-    home-manager = builtins.fetchTarball https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz;
-in
 {     
     imports = 
     [# Include the results of the hardware scan 
     ./hardware-configuration.nix 
-     (import "${home-manager}/nixos")
     ];
    
-      users.users.natem.isNormalUser = true;
-  home-manager.users.natem = { pkgs, ... }: {
-    home.packages = [ pkgs.atool pkgs.httpie ];
-    programs.bash.enable = true;
-  
-    # The state version is required and should stay at the version you
-    # originally installed.
-    home.stateVersion = "25.05";
-  };
-
+    users.users.natem = { 
+    isNormalUser = true;
+    home = "/home/nate"; 
+    description = "Nate M.";  
+  };    
     # Enable OpenGL
     hardware.graphics = {
     enable = true; 
@@ -197,25 +188,12 @@ in
    dunst
    libnotify
    fd
+   ventoy
    (import <nixos-unstable> {}).protonmail-desktop
- 
-   (buildFHSUserEnv {
-     name = "nvidia-install-env";
-     targetPkgs = pkgs: with pkgs; [
-       libgcc
-       gccgo14
-       gnumake
-       glibc
-       libcxx
-       gcc
-       # Add other necessary packages here
-      ];
-      runScript = "sh ./NVIDIA-Linux-x86_64-575.51.02.run -m=kernel-open";
-    })
   ];
-   
+ 
   system.stateVersion = "24.11"; 
-  }
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -242,3 +220,4 @@ in
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   # Did you read the comment?
+}
