@@ -18,7 +18,7 @@
 
     security.sudo = {
     enable = true;
-    wheelNeedsPassword = true; 
+    wheelNeedsPassword = false; 
     };
 
     # Enable OpenGL
