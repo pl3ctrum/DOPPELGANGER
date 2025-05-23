@@ -4,59 +4,65 @@
 
 { config, pkgs, lib, ... }:
 
-{     
-    imports = 
-    [# Include the results of the hardware scan 
-    ./hardware-configuration.nix 
+{
+    imports =
+    [# Include the results of the hardware scan
+    ./hardware-configuration.nix
     ];
-   
-    users.users.natem = { 
+
+    users.users.natem = {
     isNormalUser = true;
-    home = "/home/nate"; 
-    description = "Nate M.";  
-  };    
+    home = "/home/nate";
+    extraGroups = [ "wheel" "networkmanager" ]; 
+  };
+
+    security.sudo = {
+    enable = true;
+    wheelNeedsPassword = true; 
+    };
+
     # Enable OpenGL
     hardware.graphics = {
-    enable = true; 
+    enable = true;
     };
 
     # Load nvidia driver for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
-    
+
     hardware.nvidia = {
 
-    # Modesetting is required 
+    # Modesetting is required
     modesetting.enable = true;
-    
+
     # Nvidia power managment. Experimental, and can cause sleep/suspend to fail.
     # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
-    # of just the bar essentials. 
-    powerManagement.enable = false; 
-    
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
+    # of just the bar essentials.
+    powerManagement.enable = false;
+
     # Fine-grained power management. Turns off GPU when not in use.
     # Experimental and only works on modern Nvidia GPUS (turing or newer).
-    powerManagement.finegrained = false; 
+    powerManagement.finegrained = false;
 
-    # Use the Nvidia open source kernel module ( not to be confused with the 
-    # indpendent third-party "nouveau" open source driver.) 
-    # Support is limited to the Turing and later architectures. Full list of 
-    # supported GPUs is at: 
+    # Use the Nvidia open source kernel module ( not to be confused with the
+    # indpendent third-party "nouveau" open source driver.)
+    # Support is limited to the Turing and later architectures. Full list of
+    # supported GPUs is at:
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
-    # Only available from driver 515.43.04+ 
-    open = true; 
+    # Only available from driver 515.43.04+
+    open = true;
 
     # Enable the Nvidia settings menu,
     # acessible via 'nvidia-settings'.
-    nvidiaSettings = true; 
-    
-    #Optionally, you may need to select the appropriate driver version for your specific GPU. 
-    package = config.boot.kernelPackages.nvidiaPackages.beta; 
-}; 
-    
+    nvidiaSettings = true;
+
+    #Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+};
+
     hardware.nvidia.prime = {
     nvidiaBusId = "PCI:1:0:0";
-}; 
+};
 
   # Bootloader.
   boot.loader.grub.enable = true;
@@ -93,10 +99,10 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
- 
+
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true; 
+  services.xserver.enable = true;
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
@@ -132,10 +138,10 @@
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
 
-  # Install hyprland and other programs 
+  # Install hyprland and other programs
   programs.hyprland.enable = true;
-  programs.waybar.enable = true; 
- 
+  programs.waybar.enable = true;
+
   programs.steam = {
   enable = true;
   remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
@@ -149,13 +155,13 @@
     "steam-unwrapped"
     "steam-run"
   ];
- 
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-   security.polkit.enable = true; 
+   security.polkit.enable = true;
    environment.systemPackages = with pkgs; [
    # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
    vim
@@ -183,7 +189,7 @@
    freetube
    protonvpn-gui
    soulseekqt
-   nh 
+   nh
    gedit
    lshw
    dunst
@@ -192,8 +198,8 @@
    ventoy
    (import <nixos-unstable> {}).protonmail-desktop
   ];
- 
-  system.stateVersion = "24.11"; 
+
+  system.stateVersion = "24.11";
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
