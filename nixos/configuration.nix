@@ -13,12 +13,12 @@
     users.users.natem = {
     isNormalUser = true;
     home = "/home/nate";
-    extraGroups = [ "wheel" "networkmanager" ]; 
+    extraGroups = [ "wheel" "networkmanager" ];
   };
 
     security.sudo = {
     enable = true;
-    wheelNeedsPassword = false; 
+    wheelNeedsPassword = false;
     };
 
     # Enable OpenGL
@@ -65,9 +65,13 @@
 };
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sdb";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.grub = {
+  enable = true;
+  version = 2;
+  device = "nodev";
+  efiSupport = true;
+  efiInstallAsRemovable = true;
+  };
 
   networking.hostName = "DOPPELGANGER"; # Define your hostname.
   networking.wireless.enable = false;  # Enables wireless support via wpa_supplicant.
@@ -195,7 +199,10 @@
    dunst
    libnotify
    fd
-   ventoy
+   ventoy 
+   xen
+   logger
+   util-linux
    (import <nixos-unstable> {}).protonmail-desktop
   ];
 
