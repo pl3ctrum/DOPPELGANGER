@@ -3,18 +3,41 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, lib, ... }:
-
-{
+let
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
+in
+{ 
     imports =
     [# Include the results of the hardware scan
     ./hardware-configuration.nix
+    (import "${home-manager}/nixos")
+    /home/nate/musnix/clone 
     ];
+    
+    musnix.enable = true;
+  # Your existing configuration options
 
+  # Specify the root file system
+    fileSystems."/" = {
+    device = lib.mkForce "/dev/nvme0n1p2";  # Replace /dev/sdX1 with your actual root partition
+    fsType = "ext4";       # Replace with your actual file system type
+ };
+   
+    fileSystems."/boot" = {
+    device = lib.mkForce "/dev/nvme0n1p1";
+    fsType = "vfat"; 
+ }; 
     users.users.natem = {
     isNormalUser = true;
     home = "/home/nate";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "audio" ];
   };
+  
+    home-manager.users.natem = { pkgs, ... }: {
+    home.packages = [ pkgs.atool pkgs.httpie ];
+    programs.bash.enable = true;
+    home.stateVersion = "25.05"; 
+  }; 
 
     security.sudo = {
     enable = true;
@@ -25,6 +48,20 @@
     hardware.graphics = {
     enable = true;
     };
+
+    services.tlp = {
+    enable = true;
+    settings = {
+      START_CHARGE_THRESH = 75;
+      STOP_CHARGE_THRESH = 80;
+      # Add other TLP settings as needed
+    };
+  };
+  
+    systemd.services.tlp = {
+    enable = true;
+    wantedBy = [ "multi-user.target" ];
+  };
 
     # Load nvidia driver for Xorg and Wayland
     services.xserver.videoDrivers = ["nvidia"];
@@ -67,7 +104,6 @@
   # Bootloader.
   boot.loader.grub = {
   enable = true;
-  version = 2;
   device = "nodev";
   efiSupport = true;
   efiInstallAsRemovable = true;
@@ -78,16 +114,18 @@
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain"; 
 
   # Enable networking
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
+  #Set your time zone.
   time.timeZone = "America/Los_Angeles";
 
   # Fonts
-  fonts.packages = with pkgs; [ nerdfonts ];
+  fonts.packages = with pkgs; [
+  # Include all available Nerd Fonts
+] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -106,11 +144,14 @@
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
+  services.xserver.enable = false;
+  
 
   # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  services.displayManager.sddm = {
+  enable = true;
+  wayland.enable = true; 
+  };  
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -120,9 +161,14 @@
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+  
+   # Configure ALSA to use the Focusrite 2i2
+  environment.sessionVariables = {
+    ALSA_CARD = "Focusrite";  # Replace "Focusrite" with the actual card name or identifier
+  };
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -143,9 +189,14 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
 
   # Install hyprland and other programs
-  programs.hyprland.enable = true;
+  programs.hyprland.enable = true;  
+
   programs.waybar.enable = true;
 
+  environment.sessionVariables = {
+  WAYBAR_CONFIG = "home/nate/.config/waybar/"; 
+  }; 
+  
   programs.steam = {
   enable = true;
   remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
@@ -159,6 +210,10 @@
     "steam-unwrapped"
     "steam-run"
   ];
+ 
+  nixpkgs.config.permittedInsecurePackages = [
+  "ventoy-1.1.05"
+  ];   
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -181,15 +236,15 @@
    git
    clementine
    thunderbird-latest
-   ulauncher
+   albert
    hyprpaper
    xdg-desktop-portal-hyprland
    waybar
-   kdePackages.gwenview
    hyprshot
    fastfetch
-   discord
-   kate
+   vesktop
+   kdePackages.kate
+   kdePackages.konsole
    freetube
    protonvpn-gui
    soulseekqt
@@ -203,10 +258,20 @@
    xen
    logger
    util-linux
+   hyprland
+   nautilus
+   xorg.xrandr
+   alsa-utils
+   pavucontrol
+   networkmanagerapplet
+   reaper
+   audacity
+   tlp 
+   unzip
    (import <nixos-unstable> {}).protonmail-desktop
   ];
 
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.05";
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
