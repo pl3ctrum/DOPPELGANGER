@@ -6,6 +6,7 @@ if [ -f "$PID_FILE" ]; then
     rm -f "$PID_FILE"
 else
     # Launch Waybar in the background (&) and save its PID correctly
-    waybar -c ~/.config/waybar/waybar.conf &
+    waybar -c ~/.config/waybar/config.jsonc &
     echo $! > "$PID_FILE"
 fi
+
